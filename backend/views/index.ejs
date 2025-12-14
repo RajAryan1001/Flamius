@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Password</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f8f9fa; }
+    .reset-form { max-width: 400px; width: 100%; padding: 20px; background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .error-message { color: red; font-size: 0.9em; display: none; }
+  </style>
+</head>
+<body>
+  <div class="reset-form">
+    <h2 class="text-center mb-4">Reset Your Password</h2>
+    <form id="resetForm" action="/api/user/update-password/<%= id %>" method="POST">
+      <input type="hidden" name="token" value="<%= token %>">
+      <div class="mb-3">
+        <label for="password" class="form-label">New Password</label>
+        <input type="password" class="form-control" id="password" name="password" required minlength="6">
+      </div>
+      <div class="mb-3">
+        <label for="confirmPassword" class="form-label">Confirm Password</label>
+        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+      </div>
+      <div id="errorMessage" class="error-message mb-3"></div>
+      <button type="submit" class="btn btn-primary w-100">Update Password</button>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('resetForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const token = document.querySelector('input[name="token"]').value;
+      const errorMessage = document.getElementById('errorMessage');
+
+      if (password !== confirmPassword || password.length < 6) {
+        errorMessage.textContent = 'Passwords do not match or are too short';
+        errorMessage.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch(this.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password, confirmPassword, token })
+        });
+        const result = await response.json();
+        if (response.ok && result.message === 'Password updated successfully') {
+          alert('Password updated successfully! Redirecting to login...');
+          window.location.href = result.redirect || '/api/user/login';
+        } else {
+          errorMessage.textContent = result.message || 'An error occurred';
+          errorMessage.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Form Submission Error:', error);
+        errorMessage.textContent = 'Network error. Please try again.';
+        errorMessage.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

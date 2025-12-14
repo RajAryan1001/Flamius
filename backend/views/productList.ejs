@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Products</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f0f2f5;
+      padding: 40px 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+    }
+    .nav {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .nav a {
+      display: inline-block;
+      margin: 0 10px;
+      padding: 12px 24px;
+      background: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    .nav a:hover { background: #5a6fd8; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    .images {
+      display: flex;
+      overflow-x: auto;
+      padding: 10px;
+      gap: 10px;
+      background: #f8f9fa;
+    }
+    .images img {
+      width: 100%;
+      max-width: 280px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .content {
+      padding: 20px;
+    }
+    .title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 8px;
+    }
+    .desc {
+      color: #555;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .price {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    .user {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    .no-products {
+      text-align: center;
+      padding: 60px;
+      color: #666;
+      font-size: 1.3rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>All Products</h1>
+    <div class="nav">
+      <a href="/api/product/add-product">Add New</a>
+      <a href="/api/product/view-products">Refresh</a>
+    </div>
+
+    <div class="grid">
+      <% if (products.length === 0) { %>
+        <div class="no-products">
+          <p>No products yet. <a href="/api/product/add-product" style="color:#667eea;">Add one!</a></p>
+        </div>
+      <% } else { %>
+        <% products.forEach(p => { %>
+          <div class="card">
+            <div class="images">
+              <% if (p.images && p.images.length > 0) { %>
+                <% p.images.forEach(img => { %>
+                  <img src="<%= img.url %>" alt="<%= p.title %>">
+                <% }) %>
+              <% } else { %>
+                <img src="https://via.placeholder.com/280x200?text=No+Image" alt="No image">
+              <% } %>
+            </div>
+            <div class="content">
+              <div class="title"><%= p.title %></div>
+              <div class="desc"><%= p.description %></div>
+              <div class="price">₹<%= p.price.amount %> <%= p.price.currency %></div>
+              <div class="user">
+                By: <%= p.user_id?.name || 'Guest' %> 
+                (<%= p.user_id?.email || 'N/A' %>)
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>
