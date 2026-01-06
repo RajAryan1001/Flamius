@@ -1,4 +1,7 @@
+require('dotenv').config(); // 👈 MUST BE ON TOP
+
 const mongoose = require('mongoose');
+
 
 const connectDB = async () => {
   try {
