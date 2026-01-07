@@ -8,7 +8,7 @@ const resePassTemp = require('../utils/email.template');
 // Register
 // const registerController = async (req, res) => {
 //   try {
-//     const { name, email, password, mobile, password } = req.body;
+//     const { name, email, mobile, password } = req.body;
 //     console.log('Register Request Body:', req.body); // Debug
 
 //     // Check for passoword typo
@@ -42,12 +42,16 @@ const resePassTemp = require('../utils/email.template');
 //   }
 // };
 
+// Register
 const registerController = async (req, res) => {
   try {
-    // ✅ CORRECT WAY: Remove the typo
     const { name, email, mobile, password } = req.body;
-    
-    console.log('Register Request Body:', req.body);
+    console.log('Register Request Body:', req.body); // Debug
+
+    // ❌ REMOVE THIS USELESS CHECK COMPLETELY
+    // if (password && !password) {
+    //   return res.status(400).json({ message: 'Field "passoword" is misspelled. Use "password" instead.' });
+    // }
 
     // Detailed field validation
     const missingFields = [];
@@ -76,34 +80,71 @@ const registerController = async (req, res) => {
     });
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { 
-      expiresIn: '1h' 
+      expiresIn: '7d' // ✅ 1h se badhake 7d karo for better UX
     });
     
+    // ✅ IMPROVED COOKIE SETTINGS FOR PRODUCTION
     res.cookie('token', token, { 
       httpOnly: true, 
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' // ✅ ADD THIS FOR CORS
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
     res.status(201).json({ 
-      message: 'User registered', 
+      success: true, // ✅ Add success flag
+      message: 'User registered successfully', 
       user: { 
         id: newUser._id, 
         name, 
         email, 
         mobile 
       },
-      token: token // ✅ Frontend ke liye bhi token bhejo
+      token: token // ✅ Frontend ke liye bhi token send karo
     });
     
   } catch (error) {
     console.error('Register Error:', error);
     res.status(500).json({ 
+      success: false,
       message: 'Internal server error', 
       error: error.message 
     });
   }
 };
+
+// Login
+// const loginController = async (req, res) => {
+//   try {
+//     let { email, password, passoword } = req.body;
+//     console.log('Login Request Body:', req.body);
+
+//     // Fix typo if exists
+//     if (!password && passoword) password = passoword;
+
+//     if (!email || !password) {
+//       return res.status(400).json({ message: 'Email and password required' });
+//     }
+
+//     const user = await userModel.findOne({ email });
+//     if (!user) return res.status(400).json({ message: 'User not found' });
+
+//     const comparePass = await bcrypt.compare(password, user.password);
+//     if (!comparePass) return res.status(401).json({ message: 'Invalid credentials' });
+
+//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+//     res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+
+//     res.status(200).json({
+//       message: 'User logged in',
+//       user: { id: user._id, name: user.name, email: user.email, mobile: user.mobile },
+//     });
+//   } catch (error) {
+//     console.error('Login Error:', error);
+//     res.status(500).json({ message: 'Internal server error', error: error.message });
+//   }
+// };
+
 
 // Login
 const loginController = async (req, res) => {
@@ -115,25 +156,58 @@ const loginController = async (req, res) => {
     if (!password && passoword) password = passoword;
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password required' });
+      return res.status(400).json({ 
+        success: false,
+        message: 'Email and password required' 
+      });
     }
 
     const user = await userModel.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'User not found' });
+    if (!user) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'User not found' 
+      });
+    }
 
     const comparePass = await bcrypt.compare(password, user.password);
-    if (!comparePass) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!comparePass) {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Invalid credentials' 
+      });
+    }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { 
+      expiresIn: '7d' 
+    });
+    
+    // ✅ SAME COOKIE SETTINGS AS REGISTER
+    res.cookie('token', token, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
 
     res.status(200).json({
-      message: 'User logged in',
-      user: { id: user._id, name: user.name, email: user.email, mobile: user.mobile },
+      success: true,
+      message: 'User logged in successfully',
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        mobile: user.mobile 
+      },
+      token: token
     });
   } catch (error) {
     console.error('Login Error:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: 'Internal server error', 
+      error: error.message 
+    });
   }
 };
 

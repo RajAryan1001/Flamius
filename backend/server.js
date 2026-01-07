@@ -23,7 +23,6 @@ app.use("/uploads", express.static("uploads"));
 app.use(cors({
   origin: "https://flamius.vercel.app",
   credentials: true,
-  exposedHeaders: ['set-cookie'] 
 }));
 
 /* MIDDLEWARE */
