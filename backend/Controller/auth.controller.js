@@ -6,15 +6,48 @@ const sendMail = require('../services/mail.service');
 const resePassTemp = require('../utils/email.template');
 
 // Register
+// const registerController = async (req, res) => {
+//   try {
+//     const { name, email, password, mobile, password } = req.body;
+//     console.log('Register Request Body:', req.body); // Debug
+
+//     // Check for passoword typo
+//     if (password && !password) {
+//       return res.status(400).json({ message: 'Field "passoword" is misspelled. Use "password" instead.' });
+//     }
+
+//     // Detailed field validation
+//     const missingFields = [];
+//     if (!name) missingFields.push('name');
+//     if (!email) missingFields.push('email');
+//     if (!password) missingFields.push('password');
+//     if (!mobile) missingFields.push('mobile');
+//     if (missingFields.length > 0) {
+//       return res.status(400).json({ message: `Missing required fields: ${missingFields.join(', ')}` });
+//     }
+
+//     const existingUser = await userModel.findOne({ email });
+//     if (existingUser) return res.status(409).json({ message: 'User already exists' });
+
+//     const hashedPass = await bcrypt.hash(password, 10);
+//     const newUser = await userModel.create({ name, email, mobile, password: hashedPass });
+
+//     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+//     res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+
+//     res.status(201).json({ message: 'User registered', user: { id: newUser._id, name, email, mobile } });
+//   } catch (error) {
+//     console.error('Register Error:', error);
+//     res.status(500).json({ message: 'Internal server error', error: error.message });
+//   }
+// };
+
 const registerController = async (req, res) => {
   try {
-    const { name, email, password, mobile, passoword } = req.body;
-    console.log('Register Request Body:', req.body); // Debug
-
-    // Check for passoword typo
-    if (passoword && !password) {
-      return res.status(400).json({ message: 'Field "passoword" is misspelled. Use "password" instead.' });
-    }
+    // ✅ CORRECT WAY: Remove the typo
+    const { name, email, mobile, password } = req.body;
+    
+    console.log('Register Request Body:', req.body);
 
     // Detailed field validation
     const missingFields = [];
@@ -22,23 +55,53 @@ const registerController = async (req, res) => {
     if (!email) missingFields.push('email');
     if (!password) missingFields.push('password');
     if (!mobile) missingFields.push('mobile');
+    
     if (missingFields.length > 0) {
-      return res.status(400).json({ message: `Missing required fields: ${missingFields.join(', ')}` });
+      return res.status(400).json({ 
+        message: `Missing required fields: ${missingFields.join(', ')}` 
+      });
     }
 
     const existingUser = await userModel.findOne({ email });
-    if (existingUser) return res.status(409).json({ message: 'User already exists' });
+    if (existingUser) {
+      return res.status(409).json({ message: 'User already exists' });
+    }
 
     const hashedPass = await bcrypt.hash(password, 10);
-    const newUser = await userModel.create({ name, email, mobile, password: hashedPass });
+    const newUser = await userModel.create({ 
+      name, 
+      email, 
+      mobile, 
+      password: hashedPass 
+    });
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { 
+      expiresIn: '1h' 
+    });
+    
+    res.cookie('token', token, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict' // ✅ ADD THIS FOR CORS
+    });
 
-    res.status(201).json({ message: 'User registered', user: { id: newUser._id, name, email, mobile } });
+    res.status(201).json({ 
+      message: 'User registered', 
+      user: { 
+        id: newUser._id, 
+        name, 
+        email, 
+        mobile 
+      },
+      token: token // ✅ Frontend ke liye bhi token bhejo
+    });
+    
   } catch (error) {
     console.error('Register Error:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    res.status(500).json({ 
+      message: 'Internal server error', 
+      error: error.message 
+    });
   }
 };
 
