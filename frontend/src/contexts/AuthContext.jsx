@@ -96,7 +96,8 @@ import toast from "react-hot-toast";
 
 const AuthContext = createContext();
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_URL = "https://flamius-2.onrender.com"|| "http://localhost:4000";
+console.log(API_URL);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
