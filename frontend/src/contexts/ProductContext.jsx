@@ -55,23 +55,49 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
-  const createProduct = async (formData) => {
-    try {
-      const res = await axiosInstance.post("/create-product", formData);
+  // const createProduct = async (formData) => {
+  //   try {
+  //     const res = await axiosInstance.post("/create-product", formData);
 
-      if (res.data.success) {
-        toast.success("Product created!");
-        setProducts(prev => [...prev, res.data.data]);
-        return res.data.data;
-      } else {
-        toast.error(res.data.message);
-      }
-    } catch (error) {
-      const msg = error.response?.data?.message || "Upload failed";
-      toast.error(msg);
-      console.error("Create error:", error);
+  //     if (res.data.success) {
+  //       toast.success("Product created!");
+  //       setProducts(prev => [...prev, res.data.data]);
+  //       return res.data.data;
+  //     } else {
+  //       toast.error(res.data.message);
+  //     }
+  //   } catch (error) {
+  //     const msg = error.response?.data?.message || "Upload failed";
+  //     toast.error(msg);
+  //     console.error("Create error:", error);
+  //   }
+  // };
+
+  const createProduct = async (formData) => {
+  try {
+    const res = await axiosInstance.post("/create-product", formData);
+
+    console.log("RAW RESPONSE:", res);
+    console.log("DATA:", res.data);
+
+    if (res.data?.success) {
+      toast.success("Product created!");
+      setProducts(prev => [...prev, res.data.data]);
+      return res.data.data;
+    } else {
+      toast.error(res.data?.message || "Unknown error");
     }
-  };
+  } catch (error) {
+    if (error.response) {
+      console.error("STATUS:", error.response.status);
+      console.error("HEADERS:", error.response.headers);
+      console.error("RAW DATA:", error.response.data); // 👈 VERY IMPORTANT
+    } else {
+      console.error("NETWORK ERROR:", error.message);
+    }
+    toast.error("Upload failed");
+  }
+};
 
   const deleteProduct = async (id) => {
     try {
