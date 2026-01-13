@@ -59,18 +59,34 @@ export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", mobile: "", password: "" });
   const [loading, setLoading] = useState(false);
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   try {
+  //     await register(form);
+  //     navigate('/signin'); // Redirect after successful registration
+  //   } catch (error) {
+  //     console.error("Registration error:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await register(form);
-      navigate('/signin'); // Redirect after successful registration
-    } catch (error) {
-      console.error("Registration error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault();
+  setLoading(true);
+  
+  // ✅ Now properly handling the return value
+  const result = await register(form);
+  
+  // ✅ Only navigate if registration was successful
+  if (result.success) {
+    navigate('/signin');
+  }
+  // If failed → error already shown by AuthContext's register function
+  
+  setLoading(false);
+};
 
   return (
     <div className="w-full bg-black text-white overflow-hidden">

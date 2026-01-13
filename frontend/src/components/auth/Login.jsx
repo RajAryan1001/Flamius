@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Crown, Mail, Lock, ArrowRight, Sparkles, Key } from "lucide-react";
 import Header from "../../components/common/Header";
 import Footer from "../../components/common/Footer";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const { login } = useAuth();
