@@ -65,7 +65,7 @@ const Contact = () => {
             <h1 className="text-5xl lg:text-7xl font-black tracking-tight mb-6">
               Let's Create
               <span className="block bg-gradient-to-r from-gold to-amber-300 bg-clip-text text-transparent">
-                Memories Together
+                 Memories Together
               </span>
             </h1>
             <p className="text-xl text-white/60 max-w-3xl mx-auto">
